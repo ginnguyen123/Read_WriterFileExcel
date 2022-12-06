@@ -10,8 +10,11 @@ import java.util.*;
 
 // list tham khảo https://www.geeksforgeeks.org/reading-writing-data-excel-file-using-apache-poi/
 // https://gpcoder.com/3144-huong-dan-doc-va-ghi-file-excel-trong-java-su-dung-thu-vien-apache-poi/
+// https://tubean.github.io/2018/11/excel-file-with-poi/
+
 public class Main {
     public static void main(String[] args) throws FileNotFoundException, IOException {
+        //chưa thao tác nhiều sheet trên 1 file excel
        // writeExcelByMap();
         writeExcelByList();
     }
