@@ -6,17 +6,24 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
 import java.nio.file.Watchable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 // list tham khảo https://www.geeksforgeeks.org/reading-writing-data-excel-file-using-apache-poi/
 // https://gpcoder.com/3144-huong-dan-doc-va-ghi-file-excel-trong-java-su-dung-thu-vien-apache-poi/
 // https://tubean.github.io/2018/11/excel-file-with-poi/
-
+// https://stackoverflow.com/questions/12459181/how-to-add-new-sheets-to-existing-excel-workbook-using-apache-poi
+// https://www.javatpoint.com/how-to-read-excel-file-in-java
 public class Main {
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        //chưa thao tác nhiều sheet trên 1 file excel
-       // writeExcelByMap();
-        writeExcelByList();
+        //writeExcelByMap();
+        //writeExcelByList();
+        System.out.println("Read old File Excel!");
+        readFileExcel();
+        System.out.println("---------------------------------");
+        System.out.println("Update new data for old file excel!");
+        updateFileExcel();
     }
     public static void writeExcelByMap() throws FileNotFoundException, IOException{
         // tạo 1 workbook mới
@@ -131,5 +138,60 @@ public class Main {
         FileOutputStream fileOut = new FileOutputStream("data/test_IO_ExcelFlie.xlsx");
         fileExcel.write(fileOut);
         fileOut.close();
+    }
+    public static void readFileExcel() throws FileNotFoundException, IOException{
+        String pathFile = "data/test_IO_ExcelFlie.xlsx";
+        FileInputStream inputFile = new FileInputStream(new File(pathFile));
+        XSSFWorkbook workbook = new XSSFWorkbook(inputFile);
+        XSSFSheet sheet = workbook.getSheetAt(0);
+        Iterator<Row> iterator = sheet.iterator(); //quét qua các hàng của sheet
+        while (iterator.hasNext()){
+            //phương thức hasNext() trả về boolean, kiểm tra ở trình lặp tiếp theo có hay không
+            Row row = iterator.next(); //nếu ở sheet có hàng để đọc thì lấy hàng mới bằng phương thức .next() trả về Row
+            Iterator<Cell> cellIterator = row.cellIterator(); // quét qua các cột trên hàng thứ row
+            while (cellIterator.hasNext()){
+                Cell cell = cellIterator.next();
+                if (cell.getColumnIndex()==2){
+                    switch (cell.getCellType()){
+                        case STRING:
+                            System.out.print(cell.getStringCellValue()+"\t\t\t\t");
+                            break;
+                        case NUMERIC:
+                            DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+                            System.out.print(df.format(cell.getDateCellValue())+"\t\t\t\t");
+                            break;
+                    }
+                }else {
+                    switch (cell.getCellType()){
+                        case NUMERIC:
+                            System.out.print(cell.getNumericCellValue() + "\t\t\t\t");
+                            break;
+                        case STRING:
+                            System.out.print(cell.getStringCellValue() + "\t\t\t\t");
+                            break;
+                        case FORMULA:
+                            System.out.print(cell.getNumericCellValue() + "\t\t\t\t");
+                            break;
+                        default:
+                            System.out.println("case default");
+                            break;
+                    }
+                }
+            }
+            System.out.println();
+            inputFile.close();
+        }
+
+    }
+    public static void updateFileExcel() throws FileNotFoundException, IOException {
+        String pathFileExcel = "data/test_IO_ExcelFlie.xlsx";
+        //để update ở file Excel đã tồn tại thì cần đọc file lên rồi lưu vào collection
+        //xử lý data trên colection rồi đóng luồng input, ghi đè file xuống
+        FileInputStream inputFile = new FileInputStream(new File(pathFileExcel)); //tạo 1 luồng đọc file lên
+        XSSFWorkbook workbook = new XSSFWorkbook(inputFile); //tạo 1 workbook từ file excel đã có sẵn
+        XSSFSheet sheet = workbook.createSheet("Test Sheet 4"); // tạo 1 sheet mới trong workbook
+        FileOutputStream fileOut = new FileOutputStream(pathFileExcel); // tạo 1 luồng ghi file
+        workbook.write(fileOut); // ghi file xuống
+        fileOut.close(); //đóng luồng
     }
 }
